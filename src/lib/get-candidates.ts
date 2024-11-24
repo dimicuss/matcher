@@ -2,12 +2,11 @@ import {Match, Sequence} from "index"
 import {Node} from "./create-trie"
 import {checkName} from "./check-name"
 
-const atom = '(?:[А-ЯЁ][а-яёА-ЯЁ]+(?:-[а-яА-ЯЁ]+)?)'
+const atom = '(?:[A-ZА-ЯЁ][a-zA-Zа-яёА-ЯЁ]+(?:-[a-zA-Zа-яА-ЯЁ]+)?)'
 const space = '\\s+'
-const infixes = ['да', 'дер']
 
-const word = `${atom}(?:${space}(?:${infixes.join('|')})${space}${atom})?`
-const reduction = `[А-ЯЁ]\\.`
+const word = `${atom}(?:${space}(?:[a-zа-яё]+)${space}${atom})?`
+const reduction = `[A-ZА-ЯЁ]\\.`
 
 const matchers = [
   `(${word})(?=${space}${word})`,
@@ -19,11 +18,11 @@ export const getCandidates = (trie: Node, string: string) => {
   const regex = new RegExp(matchers, 'g')
 
   let result
-  let matchedNames: Sequence[][] = []
+  let matchedNames: Sequence[] = []
   let chainedResults: Match[] = []
 
-  const add = (seq: Sequence[]) => {
-    if (seq.length > 0) {
+  const add = (seq: Sequence) => {
+    if (seq) {
       matchedNames.push(seq)
     }
   }
@@ -45,8 +44,6 @@ export const getCandidates = (trie: Node, string: string) => {
         end: result.index + word.length,
         string: word
       })
-
-
 
       if (chainedResults.length > 1) {
         add(getSubSequences(trie, chainedResults))
@@ -72,8 +69,8 @@ export const getCandidates = (trie: Node, string: string) => {
   return matchedNames
 }
 
-const maxWindowSize = 3
-const getSubSequences = (trie: Node, matches: Match[]): Sequence[] => {
+const maxWindowSize = 7
+const getSubSequences = (trie: Node, matches: Match[]): Sequence => {
   const result: Sequence[] = []
 
   for (let windowSize = 2; windowSize <= maxWindowSize; windowSize++) {
@@ -98,6 +95,6 @@ const getSubSequences = (trie: Node, matches: Match[]): Sequence[] => {
     }
   }
 
-  return result
+  return result.sort((a, b) => b.name.length - a.name.length)[0]
 }
 
