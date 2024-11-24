@@ -69,7 +69,7 @@ export const getCandidates = (trie: Node, string: string) => {
   return matchedNames
 }
 
-const maxWindowSize = 7
+const maxWindowSize = 3
 const getSubSequences = (trie: Node, matches: Match[]): Sequence => {
   const result: Sequence[] = []
 
