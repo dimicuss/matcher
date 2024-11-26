@@ -11,6 +11,5 @@ export interface Match {
 export interface Sequence {
   start: number
   end: number
-  persons: Set<Person>
   name: string[]
 }

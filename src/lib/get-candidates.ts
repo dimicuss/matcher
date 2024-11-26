@@ -1,8 +1,6 @@
-import {Match, Sequence} from "index"
-import {Node} from "./create-trie"
-import {checkName} from "./check-name"
+import {Match, Sequence} from "../types"
 
-const atom = '(?:[A-ZА-ЯЁ][a-zA-Zа-яёА-ЯЁ]+(?:-[a-zA-Zа-яА-ЯЁ]+)?)'
+const atom = '(?:[A-ZА-ЯЁ][a-zа-яё]+(?:-[a-zа-яё]+)?)'
 const space = '\\s+'
 
 const word = `${atom}(?:${space}(?:[a-zа-яё]+)${space}${atom})?`
@@ -14,7 +12,7 @@ const matchers = [
   `(${reduction})(?=(?:\\s?${reduction})|(?:\\s?${word}))`
 ].join('|')
 
-export const getCandidates = (trie: Node, string: string) => {
+export const getCandidates = (string: string) => {
   const regex = new RegExp(matchers, 'g')
 
   let result
@@ -46,7 +44,7 @@ export const getCandidates = (trie: Node, string: string) => {
       })
 
       if (chainedResults.length > 1) {
-        add(getSubSequences(trie, chainedResults))
+        add(getSubSequences(chainedResults))
       }
 
       chainedResults = []
@@ -63,14 +61,14 @@ export const getCandidates = (trie: Node, string: string) => {
   }
 
   if (chainedResults.length > 1) {
-    add(getSubSequences(trie, chainedResults))
+    add(getSubSequences(chainedResults))
   }
 
   return matchedNames
 }
 
-const maxWindowSize = 3
-const getSubSequences = (trie: Node, matches: Match[]): Sequence => {
+const maxWindowSize = 5
+const getSubSequences = (matches: Match[]): Sequence => {
   const result: Sequence[] = []
 
   for (let windowSize = 2; windowSize <= maxWindowSize; windowSize++) {
@@ -82,16 +80,12 @@ const getSubSequences = (trie: Node, matches: Match[]): Sequence => {
       }
 
       const name = subSequence.map(({string}) => string)
-      const persons = checkName(trie, name)
 
-      if (persons.size > 0) {
-        result.push({
-          start: subSequence[0]?.start,
-          end: subSequence[subSequence.length - 1].end,
-          persons,
-          name
-        })
-      }
+      result.push({
+        start: subSequence[0]?.start,
+        end: subSequence[subSequence.length - 1].end,
+        name
+      })
     }
   }
 

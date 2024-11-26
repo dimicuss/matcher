@@ -1,14 +1,20 @@
 import {readFile} from 'fs'
 import persons from './data/persons.json'
-import {createTrie} from './lib/create-trie'
+import {createNamesTrie} from './lib/create-trie'
 import {getCandidates} from './lib/get-candidates'
 import {log} from './lib/logging'
 
-const trie = createTrie(persons)
+const searchName = createNamesTrie(persons)
+
 
 readFile(0, (_, data) => {
-  const result = getCandidates(trie, data.toString())
-  log(result)
+  log(
+    getCandidates(data.toString())
+      .map(({...props}) => ({
+        ...props,
+        props: searchName(...props.name)
+      }))
+  )
 })
 
 
