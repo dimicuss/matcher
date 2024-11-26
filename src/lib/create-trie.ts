@@ -1,114 +1,63 @@
-import {Person} from "../types";
-import {getPermutations} from "./get-permutations";
+const alphaRegex = /[a-zA-Zа-яёА-ЯЁ]/
 
-const intersection = <T>(setA: Set<T>, setB: Set<T>): Set<T> => {
-  if (setA.size > setB.size) {
-    return intersection(setB, setA)
-  }
+export const createTrie = (string: string) => {
+  const root = new Node()
+  let word: string[] = []
+  let startIndex: number | undefined
 
-  const result = new Set<T>()
+  for (let i = 0; i < string.length; i++) {
+    const char = string[i]
 
-  for (const item of setA) {
-    if (setB.has(item)) {
-      result.add(item)
+    if (char.match(alphaRegex)) {
+      if (startIndex === undefined) {
+        startIndex = i
+      }
+
+      word.push(char)
+    } else if (word.length > 0 && startIndex !== undefined) {
+      addToTrie({
+        start: startIndex,
+        object: word
+      }, root)
+
+      startIndex = undefined
+      word = []
     }
   }
 
-  return result
+  return root
 }
 
-const intersections = (nodes: [Node, Node, Node]) => {
-  let result = nodes[0].persons
-
-  for (let i = 1; i < nodes.length; i++) {
-    result = intersection(result, nodes[i].persons)
-  }
-
-  return result
-}
-
-
-const addNameToTrie = (person: Person, nameToSplit: string, root: Node) => {
-  root.persons.add(person)
-
-  for (const name of nameToSplit.split(' ')) {
-    let node = root
-
-    for (let i = 0; i < name.length; i++) {
-      const char = name[i]
-
-      if (!node.links.has(char)) {
-        node.links.set(char, new Node(i + 1))
-      }
-
-      const nextNode = node.links.get(char)
-      if (nextNode) {
-        nextNode.persons.add(person)
-        node = nextNode
-      }
-    }
-  }
-}
-
-const searchNameInTrie = (name: string, trie: Node) => {
+export const addToTrie = (word: Word, trie: Node) => {
   let node = trie
 
-  for (const char of name) {
-    const nextNode = node.links.get(char)
-    if (nextNode === undefined) break
-    node = nextNode
-  }
-
-  return node
-}
-
-export const createNamesTrie = (persons: Person[]) => {
-  const lastNames = new Node()
-  const firstNames = new Node()
-  const middleNames = new Node()
-
-  for (const person of persons) {
-    const lastName = person.last_name || ''
-    const firstName = person.name || ''
-    const middleName = person.middle_name || ''
-
-    addNameToTrie(person, lastName, lastNames)
-    addNameToTrie(person, firstName, firstNames)
-    addNameToTrie(person, middleName, middleNames)
-  }
-
-  return (firstForm = '', secondForm = '', lastForm = '') => {
-    const permutations = getPermutations([firstForm, secondForm, lastForm])
-
-    let maximumPoints = 0
-    let maximumNodes: [Node, Node, Node] | undefined
-
-    for (let namesOfPermutation of permutations) {
-      const [lastName, firstName, middleName] = namesOfPermutation;
-      const lastNameNode = searchNameInTrie(lastName, lastNames)
-      const firstNameNode = searchNameInTrie(firstName, firstNames)
-      const middleNameNode = searchNameInTrie(middleName, middleNames)
-
-      const nextMaximumPoints = lastNameNode.points + firstNameNode.points + middleNameNode.points
-
-      if (maximumPoints < nextMaximumPoints) {
-        maximumPoints = nextMaximumPoints
-        maximumNodes = [lastNameNode, firstNameNode, middleNameNode]
-      }
+  for (const char of word.object) {
+    if (!node.links.has(char)) {
+      node.links.set(char, new Node())
     }
 
-    return maximumNodes ? intersections(maximumNodes) : new Set()
+    const nextNode = node.links.get(char)
+
+    if (nextNode) {
+      node = nextNode
+    }
+  }
+
+  node.end = {
+    start: word.start,
+    end: word.start + word.object.length,
   }
 }
-
 
 export class Node {
-  persons = new Set<Person>()
+  end: {
+    start: number
+    end: number
+  } | undefined
   links = new Map<string, Node>()
-  points = 0
-
-  constructor(points = 0) {
-    this.points = points
-  }
 }
 
+interface Word {
+  start: number
+  object: string[]
+}
