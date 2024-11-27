@@ -43,18 +43,55 @@ export const addToTrie = (word: Word, trie: Node) => {
     }
   }
 
-  node.end = {
+  node.end.push({
     start: word.start,
     end: word.start + word.object.length,
+  })
+}
+
+export const searchWordInTrie = (word: string, trie: Node): Position[] => {
+  let hits = 0
+  let node = trie
+
+  for (const char of word) {
+    const nextNode = node.links.get(char)
+
+    if (nextNode) {
+      hits++
+      node = nextNode
+    } else break
   }
+
+  return hits >= word.length / 2 ? bfs(node) : []
+}
+
+const bfs = (node: Node) => {
+  const result: Position[] = []
+  const callStack = [node]
+
+  while (callStack.length > 0) {
+    const node = callStack.shift() as Node
+
+    if (node.end.length) {
+      result.push(...node.end)
+    }
+
+    for (const nextNode of node.links.values()) {
+      callStack.push(nextNode)
+    }
+  }
+
+  return result
 }
 
 export class Node {
-  end: {
-    start: number
-    end: number
-  } | undefined
+  end: Position[] = []
   links = new Map<string, Node>()
+}
+
+interface Position {
+  start: number
+  end: number
 }
 
 interface Word {
