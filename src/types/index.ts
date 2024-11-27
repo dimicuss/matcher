@@ -27,3 +27,9 @@ export interface Word {
   position: Position
   object: string[]
 }
+
+export interface SearchResult {
+  person: Person
+  ranges: Range[]
+  matches: string[]
+}

@@ -1,17 +1,25 @@
-import {Person, Position, Range} from "types"
+import {Person, Position, Range, SearchResult} from "types"
 import {Node} from "./create-trie"
 
 const SEARCH_FACTOR = 0.75
 
-export const searchPerson = (person: Person, trie: Node) => {
-  const {title} = person
+export const searchPersons = (persons: Person[], trie: Node, text: string) => {
+  const results: SearchResult[] = []
 
-  return {
-    person,
-    ranges: title
-      ? searchWord(title, trie)
-      : []
+  for (const person of persons) {
+    const {title} = person
+    const ranges = title ? searchWord(title, trie) : []
+
+    if (ranges.length) {
+      results.push({
+        person,
+        ranges,
+        matches: ranges.map(({start, end}) => text.substring(start, end))
+      })
+    }
   }
+
+  return results
 }
 
 export const searchWord = (wordToSplit: string, trie: Node) => {
@@ -30,7 +38,7 @@ export const searchWord = (wordToSplit: string, trie: Node) => {
       } else break
     }
 
-    if (hits >= word.length * SEARCH_FACTOR) {
+    if (word.length > 1 && hits >= word.length * SEARCH_FACTOR) {
       positions.push(...bfs(node))
     }
   }

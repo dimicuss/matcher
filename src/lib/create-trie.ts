@@ -3,16 +3,16 @@ import {Position} from "types"
 
 const alphaRegex = /[-a-zA-Zа-яёА-ЯЁ]/
 
-export const createTrie = (string: string) => {
+export const createTrie = (text: string) => {
   const root = new Node()
   let object: string[] = []
   let startIndex: number | undefined
   let previousPosition: Position | undefined
 
-  for (let i = 0; i < string.length; i++) {
-    const char = string[i]
+  for (let i = 0; i < text.length + 1; i++) {
+    const char = text[i]
 
-    if (char.match(alphaRegex)) {
+    if (char !== undefined && char.match(alphaRegex)) {
       if (startIndex === undefined) {
         startIndex = i
       }
@@ -43,7 +43,6 @@ export const createTrie = (string: string) => {
 
 const addToTrie = (word: Word, trie: Node) => {
   let node = trie
-
   for (const char of word.object) {
     if (!node.links.has(char)) {
       node.links.set(char, new Node())
