@@ -1,9 +1,13 @@
-const alphaRegex = /[a-zA-Zа-яёА-ЯЁ]/
+import {Word} from "types"
+import {Position} from "types"
+
+const alphaRegex = /[-a-zA-Zа-яёА-ЯЁ]/
 
 export const createTrie = (string: string) => {
   const root = new Node()
-  let word: string[] = []
+  let object: string[] = []
   let startIndex: number | undefined
+  let previousPosition: Position | undefined
 
   for (let i = 0; i < string.length; i++) {
     const char = string[i]
@@ -13,22 +17,31 @@ export const createTrie = (string: string) => {
         startIndex = i
       }
 
-      word.push(char)
-    } else if (word.length > 0 && startIndex !== undefined) {
-      addToTrie({
+      object.push(char)
+    } else if (object.length > 0 && startIndex !== undefined) {
+      const position = {
         start: startIndex,
-        object: word
-      }, root)
+        end: startIndex + object.length,
+        next: undefined
+      }
+
+      if (previousPosition) {
+        previousPosition.next = position
+      }
+
+      previousPosition = position
+
+      addToTrie({object, position}, root)
 
       startIndex = undefined
-      word = []
+      object = []
     }
   }
 
   return root
 }
 
-export const addToTrie = (word: Word, trie: Node) => {
+const addToTrie = (word: Word, trie: Node) => {
   let node = trie
 
   for (const char of word.object) {
@@ -43,58 +56,12 @@ export const addToTrie = (word: Word, trie: Node) => {
     }
   }
 
-  node.end.push({
-    start: word.start,
-    end: word.start + word.object.length,
-  })
+  node.positions.push(word.position)
 }
 
-export const searchWordInTrie = (word: string, trie: Node): Position[] => {
-  let hits = 0
-  let node = trie
-
-  for (const char of word) {
-    const nextNode = node.links.get(char)
-
-    if (nextNode) {
-      hits++
-      node = nextNode
-    } else break
-  }
-
-  return hits >= word.length / 2 ? bfs(node) : []
-}
-
-const bfs = (node: Node) => {
-  const result: Position[] = []
-  const callStack = [node]
-
-  while (callStack.length > 0) {
-    const node = callStack.shift() as Node
-
-    if (node.end.length) {
-      result.push(...node.end)
-    }
-
-    for (const nextNode of node.links.values()) {
-      callStack.push(nextNode)
-    }
-  }
-
-  return result
-}
 
 export class Node {
-  end: Position[] = []
+  positions: Position[] = []
   links = new Map<string, Node>()
 }
 
-interface Position {
-  start: number
-  end: number
-}
-
-interface Word {
-  start: number
-  object: string[]
-}

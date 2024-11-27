@@ -13,3 +13,17 @@ export interface Sequence {
   end: number
   name: string[]
 }
+
+export interface Position extends Range {
+  next: Position | undefined
+}
+
+export interface Range {
+  start: number
+  end: number
+}
+
+export interface Word {
+  position: Position
+  object: string[]
+}
