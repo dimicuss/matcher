@@ -16,6 +16,7 @@ export interface Sequence {
 
 export interface Position extends Range {
   next: Position | undefined
+  length: number
 }
 
 export interface Range {
@@ -28,8 +29,3 @@ export interface Word {
   object: string
 }
 
-export interface SearchResult {
-  person: Person
-  ranges: Range[]
-  matches: string[]
-}

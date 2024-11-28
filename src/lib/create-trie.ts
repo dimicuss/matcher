@@ -14,6 +14,7 @@ export const createTrie = (text: string) => {
     const position = {
       start: match.index,
       end: match.index + object.length,
+      length: object.length,
       next: undefined
     }
 
