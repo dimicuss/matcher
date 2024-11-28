@@ -1,41 +1,29 @@
 import {Word} from "types"
 import {Position} from "types"
 
-const alphaRegex = /[-a-zA-Zа-яёА-ЯЁ]/
-
 export const createTrie = (text: string) => {
   const root = new Node()
-  let object: string[] = []
-  let startIndex: number | undefined
+  const regex = /[-a-zA-Zа-яёА-ЯЁ]+/g
+
+  let match: RegExpExecArray | null
   let previousPosition: Position | undefined
 
-  for (let i = 0; i < text.length + 1; i++) {
-    const char = text[i]
+  while ((match = regex.exec(text)) !== null) {
+    const object = match[0]
 
-    if (char !== undefined && char.match(alphaRegex)) {
-      if (startIndex === undefined) {
-        startIndex = i
-      }
-
-      object.push(char)
-    } else if (object.length > 0 && startIndex !== undefined) {
-      const position = {
-        start: startIndex,
-        end: startIndex + object.length,
-        next: undefined
-      }
-
-      if (previousPosition) {
-        previousPosition.next = position
-      }
-
-      previousPosition = position
-
-      addToTrie({object, position}, root)
-
-      startIndex = undefined
-      object = []
+    const position = {
+      start: match.index,
+      end: match.index + object.length,
+      next: undefined
     }
+
+    if (previousPosition) {
+      previousPosition.next = position
+    }
+
+    previousPosition = position
+
+    addToTrie({object, position}, root)
   }
 
   return root

@@ -25,7 +25,7 @@ export interface Range {
 
 export interface Word {
   position: Position
-  object: string[]
+  object: string
 }
 
 export interface SearchResult {
