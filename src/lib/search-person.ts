@@ -38,15 +38,15 @@ export const searchWord = (wordToSplit: string, trie: Trie) => {
       if (nextNode) {
         hits++
         node = nextNode
-      } else break
-    }
 
-    if (hits / word.length >= SEARCH_FACTOR) {
-      for (const range of bfs(node)) {
-        if (Math.abs(hits - range.subString.length) <= MAX_DIFF) {
-          ranges.add(range)
+        if (hits / word.length >= SEARCH_FACTOR) {
+          for (const range of bfs(node)) {
+            if (Math.abs(hits - range.subString.length) <= MAX_DIFF) {
+              ranges.add(range)
+            }
+          }
         }
-      }
+      } else break
     }
   }
 
@@ -100,9 +100,7 @@ const bfs = (node: Node) => {
   while (callStack.length > 0) {
     const node = callStack.shift() as Node
 
-    if (node.ranges.length) {
-      result.push(...node.ranges)
-    }
+    result.push(...node.ranges)
 
     for (const nextNode of node.links.values()) {
       callStack.push(nextNode)
