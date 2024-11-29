@@ -1,38 +1,37 @@
-import {Word} from "types"
-import {Position} from "types"
+import {Range} from "types"
 
 export const createTrie = (text: string) => {
   const root = new Node()
   const regex = /[-a-zA-Zа-яёА-ЯЁ]+/g
 
   let match: RegExpExecArray | null
-  let previousPosition: Position | undefined
+  let previousRange: Range | undefined
 
   while ((match = regex.exec(text)) !== null) {
-    const object = match[0]
+    const subString = match[0]
 
-    const position = {
+    const range: Range = {
       start: match.index,
-      end: match.index + object.length,
-      length: object.length,
+      end: match.index + subString.length,
+      subString,
       next: undefined
     }
 
-    if (previousPosition) {
-      previousPosition.next = position
+    if (previousRange) {
+      previousRange.next = range
     }
 
-    previousPosition = position
+    previousRange = range
 
-    addToTrie({object, position}, root)
+    addToTrie(range, root)
   }
 
-  return root
+  return {text, root}
 }
 
-const addToTrie = (word: Word, trie: Node) => {
+const addToTrie = (range: Range, trie: Node) => {
   let node = trie
-  for (const char of word.object) {
+  for (const char of range.subString) {
     if (!node.links.has(char)) {
       node.links.set(char, new Node())
     }
@@ -44,12 +43,14 @@ const addToTrie = (word: Word, trie: Node) => {
     }
   }
 
-  node.positions.push(word.position)
+  node.ranges.push(range)
 }
 
 
 export class Node {
-  positions: Position[] = []
+  ranges: Range[] = []
   links = new Map<string, Node>()
 }
+
+export type Trie = ReturnType<typeof createTrie>
 

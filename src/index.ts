@@ -1,5 +1,4 @@
 import {readFile} from 'fs'
-import {log} from 'lib/logging'
 import persons from 'data/persons.json'
 import {searchPersons} from 'lib/search-person'
 import {createTrie} from 'lib/create-trie'
@@ -10,7 +9,7 @@ readFile(0, (_, data) => {
   const results = searchPersons(persons, trie)
 
   for (const [range, persons] of results) {
-    console.log(text.substring(range.start, range.end), range)
+    console.log(range.subString, range.start, range.end)
 
     for (const person of persons) {
       console.log('    ', person.title, person.id)
