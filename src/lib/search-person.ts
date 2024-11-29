@@ -45,6 +45,8 @@ export const searchWord = (wordToSplit: string, trie: Trie) => {
               ranges.add(range)
             }
           }
+
+          break
         }
       } else break
     }
