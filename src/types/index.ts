@@ -9,3 +9,9 @@ export interface Range {
   next: Range | undefined
 }
 
+export interface TypedRange {
+  range: Range
+  type: 'middleName' | 'firstName' | 'lastName'
+}
+
+

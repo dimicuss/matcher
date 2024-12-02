@@ -1,9 +1,8 @@
 import {Range} from "types"
 
-// если предыдущий матч в цепочке, то добавляем в рендж, иначе 
-
 const wordPattern = '[-a-zA-Zа-яёА-ЯЁ]+'
-const pattern = `(${wordPattern}(?=\\s${wordPattern}))|(${wordPattern})`
+const space = '(?:\\s|\\.\\s|\\.)'
+const pattern = `(${wordPattern}(?=${space}${wordPattern}))|(${wordPattern})`
 
 export const createTrie = (text: string) => {
   const root = new Node()
