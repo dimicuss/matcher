@@ -1,38 +1,42 @@
 import {Range} from "types"
 
+// если предыдущий матч в цепочке, то добавляем в рендж, иначе 
+
+const wordPattern = '[-a-zA-Zа-яёА-ЯЁ]+'
+const pattern = `(${wordPattern}(?=\\s${wordPattern}))|(${wordPattern})`
+
 export const createTrie = (text: string) => {
   const root = new Node()
-  const regex = /(\s+)|([-a-zA-Zа-яёА-ЯЁ]+)|([^-a-zA-Zа-яёА-ЯЁ]+)/g
+  const regex = new RegExp(pattern, 'g')
 
   let match: RegExpExecArray | null = null
-  let previousMatch: RegExpExecArray | null = null
   let previousRange: Range | undefined
 
   while ((match = regex.exec(text)) !== null) {
-    const word = match[2]
+    const word = match[0]
+    const chainedWord = match[1]
+    const simpleWord = match[2]
 
-    if (word) {
-      const range: Range = {
-        start: match.index,
-        end: match.index + word.length,
-        next: undefined,
-        word,
-      }
-
-      if (previousMatch && previousMatch[3]) {
-        previousRange = undefined
-      }
-
-      if (previousRange) {
-        previousRange.next = range
-      }
-
-      previousRange = range
-
-      addToTrie(range, root)
+    const range: Range = {
+      start: match.index,
+      end: match.index + word.length,
+      next: undefined,
+      word,
     }
 
-    previousMatch = match
+    if (previousRange) {
+      previousRange.next = range
+    }
+
+    if (chainedWord) {
+      previousRange = range
+    }
+
+    if (simpleWord) {
+      previousRange = undefined
+    }
+
+    addToTrie(range, root)
   }
 
   return {text, root}
