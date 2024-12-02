@@ -22,7 +22,7 @@ export const searchPersons = (persons: Person[], trie: Trie) => {
     }
   }
 
-  return new Map(removeDuplicates([...result].sort(([a], [b]) => a.start - b.start), ([range]) => range.subString))
+  return new Map(removeDuplicates([...result].sort(([a], [b]) => a.start - b.start), ([range]) => range.word))
 }
 
 export const searchWord = (wordToSplit: string, trie: Trie) => {
@@ -41,7 +41,7 @@ export const searchWord = (wordToSplit: string, trie: Trie) => {
 
         if (hits / word.length >= SEARCH_FACTOR) {
           for (const range of bfs(node)) {
-            if (Math.abs(hits - range.subString.length) <= MAX_DIFF) {
+            if (Math.abs(hits - range.word.length) <= MAX_DIFF) {
               ranges.add(range)
             }
           }
@@ -75,7 +75,7 @@ const mergePositions = (positionsToClone: Set<Range>, trie: Trie) => {
         result.push(rangeMemo({
           start: lastRanges.start,
           end: range.end,
-          subString: trie.text.substring(lastRanges.start, range.end),
+          word: trie.text.substring(lastRanges.start, range.end),
           next: undefined
         }))
       }

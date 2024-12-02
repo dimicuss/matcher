@@ -5,7 +5,7 @@ export type Person = (typeof persons)[0]
 export interface Range {
   start: number
   end: number
-  subString: string
+  word: string
   next: Range | undefined
 }
 
