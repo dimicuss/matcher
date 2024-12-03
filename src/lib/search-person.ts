@@ -124,17 +124,17 @@ const searchWord = (wordToSplit: string, trie: Trie, cb: (range: Range) => void)
       } else break
     }
 
-    if (hits / word.length >= SEARCH_FACTOR) bfs(node, (range) => {
+    if (hits / word.length >= SEARCH_FACTOR) dfs(node, (range) => {
       if (Math.abs(hits - range.word.length) <= MAX_DIFF) cb(range)
     })
   }
 }
 
-const bfs = (node: Node, cb: (range: Range) => void) => {
+const dfs = (node: Node, cb: (range: Range) => void) => {
   const callStack = [node]
 
   while (callStack.length > 0) {
-    const node = callStack.shift() as Node
+    const node = callStack.pop() as Node
 
     for (const range of node.ranges) {
       cb(range)
