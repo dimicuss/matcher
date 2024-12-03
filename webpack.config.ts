@@ -1,3 +1,4 @@
+import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import {Configuration} from "webpack";
 
@@ -28,6 +29,7 @@ const config: Configuration = {
     filename: 'index.js',
     path: path.resolve(__dirname, 'build/')
   },
+  plugins: [new HtmlWebpackPlugin()],
 };
 
 export default config
