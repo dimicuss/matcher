@@ -66,7 +66,7 @@ const searchShortPerson = (person: Person, trie: Trie) => {
   let ranges: TypedRange[] = []
 
   const lastName = person.last_name || ''
-  const firstName = person.name[0] || ''
+  const firstName = person.name?.[0] || ''
   const middleName = person.middle_name?.[0] || ''
 
   if (lastName) {

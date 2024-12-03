@@ -5,14 +5,17 @@
   "author": "dimicuss",
   "license": "ISC",
   "scripts": {
-    "start": "npx tsx src/index.ts",
-    "watch": "npx tsc --noEmit --watch"
+    "watch": "npx tsc --noEmit --watch",
+    "build": "npx webpack build"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
-    "@types/node": "^22.10.0",
-    "@types/russian-nouns-js": "^1.2.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.10.1",
+    "@types/webpack": "^5.28.5",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
   }
 }

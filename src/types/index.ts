@@ -1,6 +1,10 @@
-import persons from '../data/persons.json'
-
-export type Person = (typeof persons)[0]
+export type Person = {
+  title: string,
+  last_name: string | null,
+  middle_name: string | null,
+  id: number,
+  name: string | null
+}
 
 export interface Range {
   start: number
