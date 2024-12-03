@@ -56,6 +56,10 @@ const searchFullPerson = (person: Person, trie: Trie) => {
   ranges.sort((a, b) => a.range.start - b.range.start)
 
   return mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
+    .filter((ranges) =>
+      ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName') ||
+      ranges.find(({type}) => type === 'middleName') && ranges.find(({type}) => type === 'firstName')
+    )
 }
 
 const searchShortPerson = (person: Person, trie: Trie) => {
