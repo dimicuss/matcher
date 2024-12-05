@@ -1,10 +1,20 @@
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import path from "path";
+import {resolve} from "path";
 import {Configuration} from "webpack";
 
+const env = process.env.NODE_ENV || 'development'
+
+const entry = env === 'development' ? resolve('src/dev/index.ts') : resolve('/src/index.ts')
+const mode = env === 'development' ? 'development' : 'production'
+const plugins = env === 'development' ? [
+  new HtmlWebpackPlugin({
+    template: resolve('src/dev/index.html',)
+  })
+] : []
+
 const config: Configuration = {
-  mode: 'production',
-  entry: './src/index.ts',
+  mode,
+  entry,
   target: ['web', 'es6'],
   module: {
     rules: [
@@ -16,9 +26,9 @@ const config: Configuration = {
     ],
   },
   resolve: {
-    extensions: ['.ts'],
+    extensions: [".wasm", ".ts", ".tsx", ".mjs", ".cjs", ".js", ".json"],
     alias: {
-      lib: path.resolve(__dirname, 'src/lib/')
+      lib: resolve(__dirname, 'src/lib/')
     },
   },
   output: {
@@ -27,9 +37,9 @@ const config: Configuration = {
       type: 'window'
     },
     filename: 'index.js',
-    path: path.resolve(__dirname, 'build/')
+    path: resolve(__dirname, 'build/')
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins,
 };
 
 export default config

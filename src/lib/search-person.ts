@@ -1,5 +1,5 @@
 import {Person, Range, TypedRange} from "types"
-import {Node, Trie} from "./create-trie"
+import {TrieNode, Trie} from "./create-trie"
 import {removeDuplicates} from "./remove-duplicates"
 import {createRange} from "./create-range"
 
@@ -11,7 +11,7 @@ export const searchPersons = (persons: Person[], trie: Trie) => {
 
   for (const person of persons) {
     for (const typedRanges of searchFullPerson(person, trie)) {
-      const range = createRange(typedRanges, trie)
+      const range = createRange(typedRanges)
 
       if (!result.has(range)) {
         result.set(range, new Set())
@@ -21,7 +21,7 @@ export const searchPersons = (persons: Person[], trie: Trie) => {
     }
 
     for (const typedRanges of searchShortPerson(person, trie)) {
-      const range = createRange(typedRanges, trie)
+      const range = createRange(typedRanges)
 
       if (!result.has(range)) {
         result.set(range, new Set())
@@ -113,7 +113,7 @@ const mergeRanges = <T>(items: T[], check: (item: T, nextItem: T) => boolean) =>
 const searchWord = (wordToSplit: string, trie: Trie, cb: (range: Range) => void) => {
   for (const word of wordToSplit.split(' ')) {
     let hits = 0
-    let node: Node = trie.root
+    let node: TrieNode = trie.root
 
     for (const char of word) {
       const nextNode = node.links.get(char)
@@ -130,11 +130,11 @@ const searchWord = (wordToSplit: string, trie: Trie, cb: (range: Range) => void)
   }
 }
 
-const dfs = (node: Node, cb: (range: Range) => void) => {
+const dfs = (node: TrieNode, cb: (range: Range) => void) => {
   const callStack = [node]
 
   while (callStack.length > 0) {
-    const node = callStack.pop() as Node
+    const node = callStack.pop() as TrieNode
 
     for (const range of node.ranges) {
       cb(range)

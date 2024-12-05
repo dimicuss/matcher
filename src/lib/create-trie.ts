@@ -4,8 +4,23 @@ const wordPattern = '[-a-zA-Zа-яёА-ЯЁ]+'
 const space = '(?:\\s|\\.\\s|\\.)'
 const pattern = `(${wordPattern}(?=${space}${wordPattern}))|(${wordPattern})`
 
-export const createTrie = (text: string) => {
-  const root = new Node()
+export const createTrie = (node: Node) => {
+  const root = new TrieNode()
+
+  dfs(node, (node) => {
+    if (node.nodeName === '#text') {
+      const {textContent, parentNode} = node
+
+      if (textContent && parentNode) {
+        addTextToTrie(root, textContent, parentNode)
+      }
+    }
+  })
+
+  return {root, node}
+}
+
+const addTextToTrie = (root: TrieNode, text: string, parent: Node) => {
   const regex = new RegExp(pattern, 'g')
 
   let match: RegExpExecArray | null = null
@@ -21,6 +36,7 @@ export const createTrie = (text: string) => {
       end: match.index + word.length,
       next: undefined,
       word,
+      parent
     }
 
     if (previousRange) {
@@ -35,34 +51,42 @@ export const createTrie = (text: string) => {
       previousRange = undefined
     }
 
-    addToTrie(range, root)
+    let node = root
+
+    for (const char of range.word) {
+      if (!node.links.has(char)) {
+        node.links.set(char, new TrieNode())
+      }
+
+      node = node.links.get(char) as TrieNode
+    }
+
+    node.ranges.push(range)
   }
 
   return {text, root}
 }
 
-const addToTrie = (range: Range, trie: Node) => {
-  let node = trie
-  for (const char of range.word) {
-    if (!node.links.has(char)) {
-      node.links.set(char, new Node())
-    }
+const dfs = (node: Node, cb: (range: Node) => void) => {
+  const callStack = [node]
 
-    const nextNode = node.links.get(char)
+  while (callStack.length > 0) {
+    const node = callStack.pop() as Node
 
-    if (nextNode) {
-      node = nextNode
-    }
+    cb(node)
+
+    node.childNodes.forEach((childNode) => {
+      callStack.push(childNode)
+    })
   }
-
-  node.ranges.push(range)
 }
 
 
-export class Node {
+export class TrieNode {
   ranges: Range[] = []
-  links = new Map<string, Node>()
+  links = new Map<string, TrieNode>()
 }
 
 export type Trie = ReturnType<typeof createTrie>
+
 

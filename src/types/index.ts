@@ -11,6 +11,7 @@ export interface Range {
   end: number
   word: string
   next: Range | undefined
+  parent: Node
 }
 
 export interface TypedRange {
