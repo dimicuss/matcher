@@ -9,10 +9,10 @@ export const createTrie = (node: Node) => {
 
   dfs(node, (node) => {
     if (node.nodeName === '#text') {
-      const {textContent, parentNode} = node
+      const {textContent} = node
 
-      if (textContent && parentNode) {
-        addTextToTrie(root, textContent, parentNode)
+      if (textContent) {
+        addTextToTrie(root, textContent, node)
       }
     }
   })
