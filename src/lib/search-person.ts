@@ -7,31 +7,23 @@ const MAX_DIFF = 3
 const SEARCH_FACTOR = 0.75
 
 export const searchPersons = (persons: Person[], trie: Trie) => {
-  const result = new Map<Range, Set<Person>>()
+  const result = new Map<Person, Range>()
 
   for (const person of persons) {
-    for (const typedRanges of searchFullPerson(person, trie)) {
-      const range = createRange(typedRanges)
+    const firstRange = searchFullPerson(person, trie).sort(([a], [b]) => a.range.start - b.range.start)[0]
 
-      if (!result.has(range)) {
-        result.set(range, new Set())
-      }
-
-      result.get(range)?.add(person)
+    if (firstRange && !result.has(person)) {
+      result.set(person, createRange(firstRange))
     }
 
-    for (const typedRanges of searchShortPerson(person, trie)) {
-      const range = createRange(typedRanges)
+    const firstShortedRange = searchShortPerson(person, trie).sort(([a], [b]) => a.range.start - b.range.start)[0]
 
-      if (!result.has(range)) {
-        result.set(range, new Set())
-      }
-
-      result.get(range)?.add(person)
+    if (firstShortedRange && !result.has(person)) {
+      result.set(person, createRange(firstShortedRange))
     }
   }
 
-  return new Map(removeDuplicates([...result].sort(([a], [b]) => a.start - b.start), ([range]) => range.word))
+  return result
 }
 
 const searchFullPerson = (person: Person, trie: Trie) => {
@@ -56,10 +48,6 @@ const searchFullPerson = (person: Person, trie: Trie) => {
   ranges.sort((a, b) => a.range.start - b.range.start)
 
   return mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
-    .filter((ranges) =>
-      ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName') ||
-      ranges.find(({type}) => type === 'middleName') && ranges.find(({type}) => type === 'firstName')
-    )
 }
 
 const searchShortPerson = (person: Person, trie: Trie) => {
@@ -84,7 +72,7 @@ const searchShortPerson = (person: Person, trie: Trie) => {
   const handledRanges = removeDuplicates(ranges, ({range}) => range).sort((a, b) => a.range.start - b.range.start)
 
   return mergeRanges(handledRanges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
-    .filter((ranges) => ranges.find(({type}) => type === 'lastName'))
+    .filter((ranges) => ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName'))
 }
 
 const mergeRanges = <T>(items: T[], check: (item: T, nextItem: T) => boolean) => {
