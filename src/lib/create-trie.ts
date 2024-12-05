@@ -6,13 +6,15 @@ const pattern = `(${wordPattern}(?=${space}${wordPattern}))|(${wordPattern})`
 
 export const createTrie = (node: Node) => {
   const root = new TrieNode()
+  let order = 0
 
   dfs(node, (node) => {
     if (node.nodeName === '#text') {
       const {textContent} = node
 
       if (textContent) {
-        addTextToTrie(root, textContent, node)
+        addTextToTrie(root, textContent, node, order)
+        order++
       }
     }
   })
@@ -20,7 +22,7 @@ export const createTrie = (node: Node) => {
   return {root, node}
 }
 
-const addTextToTrie = (root: TrieNode, text: string, parent: Node) => {
+const addTextToTrie = (root: TrieNode, text: string, node: Node, order: number) => {
   const regex = new RegExp(pattern, 'g')
 
   let match: RegExpExecArray | null = null
@@ -34,9 +36,10 @@ const addTextToTrie = (root: TrieNode, text: string, parent: Node) => {
     const range: Range = {
       start: match.index,
       end: match.index + word.length,
-      next: undefined,
       word,
-      parent
+      node,
+      order,
+      next: undefined,
     }
 
     if (previousRange) {
@@ -51,17 +54,17 @@ const addTextToTrie = (root: TrieNode, text: string, parent: Node) => {
       previousRange = undefined
     }
 
-    let node = root
+    let currentNode = root
 
     for (const char of range.word) {
-      if (!node.links.has(char)) {
-        node.links.set(char, new TrieNode())
+      if (!currentNode.links.has(char)) {
+        currentNode.links.set(char, new TrieNode())
       }
 
-      node = node.links.get(char) as TrieNode
+      currentNode = currentNode.links.get(char) as TrieNode
     }
 
-    node.ranges.push(range)
+    currentNode.ranges.push(range)
   }
 
   return {text, root}
@@ -75,9 +78,12 @@ const dfs = (node: Node, cb: (range: Node) => void) => {
 
     cb(node)
 
-    node.childNodes.forEach((childNode) => {
-      callStack.push(childNode)
-    })
+    const nodes = Array.from(node.childNodes)
+
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const nextNode = nodes[i]
+      callStack.push(nextNode)
+    }
   }
 }
 

@@ -10,20 +10,20 @@ export const searchPersons = (persons: Person[], trie: Trie) => {
   const result = new Map<Person, Range>()
 
   for (const person of persons) {
-    const firstRange = searchFullPerson(person, trie).sort(([a], [b]) => a.range.start - b.range.start)[0]
+    const firstRange = searchFullPerson(person, trie)[0]
 
     if (firstRange && !result.has(person)) {
       result.set(person, createRange(firstRange))
     }
 
-    const firstShortedRange = searchShortPerson(person, trie).sort(([a], [b]) => a.range.start - b.range.start)[0]
+    const firstShortedRange = searchShortPerson(person, trie)[0]
 
     if (firstShortedRange && !result.has(person)) {
       result.set(person, createRange(firstShortedRange))
     }
   }
 
-  return result
+  return [...result]
 }
 
 const searchFullPerson = (person: Person, trie: Trie) => {
@@ -45,7 +45,7 @@ const searchFullPerson = (person: Person, trie: Trie) => {
     searchWord(middleName, trie, (range) => ranges.push({range, type: 'middleName'}))
   }
 
-  ranges.sort((a, b) => a.range.start - b.range.start)
+  ranges.sort(sortRanges)
 
   return mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
 }
@@ -69,7 +69,7 @@ const searchShortPerson = (person: Person, trie: Trie) => {
     searchWord(middleName, trie, (range) => ranges.push({range, type: 'middleName'}))
   }
 
-  const handledRanges = removeDuplicates(ranges, ({range}) => range).sort((a, b) => a.range.start - b.range.start)
+  const handledRanges = removeDuplicates(ranges, ({range}) => range).sort(sortRanges)
 
   return mergeRanges(handledRanges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
     .filter((ranges) => ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName'))
@@ -135,3 +135,7 @@ const dfs = (node: TrieNode, cb: (range: Range) => void) => {
 }
 
 
+const sortRanges = (a: TypedRange, b: TypedRange) => {
+  const rangeDiff = a.range.order - b.range.order
+  return rangeDiff === 0 ? a.range.start - b.range.start : rangeDiff
+}
