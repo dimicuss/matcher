@@ -19,7 +19,7 @@ export const createTrie = (node: Node) => {
     }
   })
 
-  return {root, node}
+  return root
 }
 
 const addTextToTrie = (root: TrieNode, text: string, node: Node, order: number) => {
@@ -92,7 +92,4 @@ export class TrieNode {
   ranges: Range[] = []
   links = new Map<string, TrieNode>()
 }
-
-export type Trie = ReturnType<typeof createTrie>
-
 

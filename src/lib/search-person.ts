@@ -1,12 +1,13 @@
 import {Person, Range, TypedRange} from "types"
-import {TrieNode, Trie} from "./create-trie"
+import {TrieNode} from "./create-trie"
 import {removeDuplicates} from "./remove-duplicates"
 import {createRange} from "./create-range"
+import {mergeRanges} from "./merge-ranges"
 
 const MAX_DIFF = 3
 const SEARCH_FACTOR = 0.75
 
-export const searchPersons = (persons: Person[], trie: Trie) => {
+export const searchPersons = (persons: Person[], trie: TrieNode) => {
   const result = new Map<Person, Range>()
 
   for (const person of persons) {
@@ -26,7 +27,7 @@ export const searchPersons = (persons: Person[], trie: Trie) => {
   return [...result]
 }
 
-const searchFullPerson = (person: Person, trie: Trie) => {
+const searchFullPerson = (person: Person, trie: TrieNode) => {
   const ranges: TypedRange[] = []
 
   const lastName = person.last_name || ''
@@ -50,7 +51,7 @@ const searchFullPerson = (person: Person, trie: Trie) => {
   return mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
 }
 
-const searchShortPerson = (person: Person, trie: Trie) => {
+const searchShortPerson = (person: Person, trie: TrieNode) => {
   let ranges: TypedRange[] = []
 
   const lastName = person.last_name || ''
@@ -75,33 +76,14 @@ const searchShortPerson = (person: Person, trie: Trie) => {
     .filter((ranges) => ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName'))
 }
 
-const mergeRanges = <T>(items: T[], check: (item: T, nextItem: T) => boolean) => {
-  const result: T[][] = []
-  let mergedItems: T[] = []
+const searchWord = (wordToSplit: string, trie: TrieNode, cb: (range: Range) => void) => {
+  let commonHits = 0
+  let commonLength = 0
+  let nodes: {node: TrieNode, hits: number}[] = []
 
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    const nextItem = items[i + 1]
-
-    if (nextItem === undefined) {
-      mergedItems.push(item)
-      if (mergedItems.length > 1) result.push(mergedItems)
-    } else if (check(item, nextItem)) {
-      mergedItems.push(item)
-    } else {
-      mergedItems.push(item)
-      if (mergedItems.length > 1) result.push(mergedItems)
-      mergedItems = []
-    }
-  }
-
-  return result
-}
-
-const searchWord = (wordToSplit: string, trie: Trie, cb: (range: Range) => void) => {
   for (const word of wordToSplit.split(' ')) {
     let hits = 0
-    let node: TrieNode = trie.root
+    let node: TrieNode = trie
 
     for (const char of word) {
       const nextNode = node.links.get(char)
@@ -112,7 +94,16 @@ const searchWord = (wordToSplit: string, trie: Trie, cb: (range: Range) => void)
       } else break
     }
 
-    if (hits / word.length >= SEARCH_FACTOR) dfs(node, (range) => {
+    commonLength += word.length
+    commonHits += hits
+
+    if (hits / word.length >= SEARCH_FACTOR) {
+      nodes.push({node, hits})
+    }
+  }
+
+  if (commonHits / commonLength >= SEARCH_FACTOR) {
+    for (const {node, hits} of nodes) dfs(node, (range) => {
       if (Math.abs(hits - range.word.length) <= MAX_DIFF) cb(range)
     })
   }
