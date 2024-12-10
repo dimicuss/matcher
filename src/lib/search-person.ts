@@ -11,16 +11,16 @@ export const searchPersons = (persons: Person[], trie: TrieNode) => {
   const result = new Map<Person, Range>()
 
   for (const person of persons) {
-    const firstRange = searchFullPerson(person, trie)[0]
+    const firstRange = searchFullPerson(person, trie)[0] || []
+    const firstShortedRange = searchShortPerson(person, trie)[0] || []
 
-    if (firstRange && !result.has(person)) {
-      result.set(person, createRange(firstRange))
-    }
+    const maximalRange = [
+      firstRange,
+      firstShortedRange
+    ].sort((a, b) => b.length - a.length)[0]
 
-    const firstShortedRange = searchShortPerson(person, trie)[0]
-
-    if (firstShortedRange && !result.has(person)) {
-      result.set(person, createRange(firstShortedRange))
+    if (maximalRange && maximalRange.length && !result.has(person)) {
+      result.set(person, createRange(maximalRange))
     }
   }
 
@@ -48,7 +48,15 @@ const searchFullPerson = (person: Person, trie: TrieNode) => {
 
   ranges.sort(sortRanges)
 
-  return mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
+  const mergedRanges = mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
+
+  return lastName && firstName || firstName && middleName
+    ? mergedRanges.filter((ranges) =>
+      ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName') ||
+      ranges.find(({type}) => type === 'middleName') && ranges.find(({type}) => type === 'firstName'))
+    : firstName && !lastName && !middleName
+      ? mergedRanges.filter((ranges) => ranges.find(({type}) => type === 'firstName'))
+      : []
 }
 
 const searchShortPerson = (person: Person, trie: TrieNode) => {
