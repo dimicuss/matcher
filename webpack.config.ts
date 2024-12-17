@@ -4,22 +4,21 @@ import {Configuration} from "webpack";
 
 const env = process.env.NODE_ENV || 'development'
 
-const entry = env === 'development' ? resolve('src/dev/index.ts') : resolve('/src/index.ts')
+const entry = env === 'development' ? resolve('src/dev/index.tsx') : resolve('/src/index.ts')
 const mode = env === 'development' ? 'development' : 'production'
 const plugins = env === 'development' ? [
   new HtmlWebpackPlugin({
-    template: resolve('src/dev/index.html',)
+    template: resolve('src/assets/index.html',)
   })
 ] : []
 
 const config: Configuration = {
   mode,
   entry,
-  target: ['web', 'es6'],
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
