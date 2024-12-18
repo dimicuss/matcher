@@ -8,7 +8,7 @@ const entry = env === 'development' ? resolve('src/dev/index.tsx') : resolve('/s
 const mode = env === 'development' ? 'development' : 'production'
 const plugins = env === 'development' ? [
   new HtmlWebpackPlugin({
-    template: resolve('src/assets/index.html',)
+    template: resolve('src/assets/index.html')
   })
 ] : []
 
@@ -39,6 +39,9 @@ const config: Configuration = {
     path: resolve(__dirname, 'build/')
   },
   plugins,
+  optimization: {
+    minimize: false
+  }
 };
 
 export default config
