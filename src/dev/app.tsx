@@ -1,4 +1,4 @@
-import {Editor} from "./src/editor"
+import {Editor} from "./src/ui/editor"
 import {GlobalStyles} from "./src/styles"
 
 export const App = () => {
