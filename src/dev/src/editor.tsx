@@ -1,27 +1,21 @@
 import {EditorState} from "prosemirror-state"
 import {EditorView} from "prosemirror-view"
-import {Schema, DOMParser} from "prosemirror-model"
-import {schema} from "prosemirror-schema-basic"
-import {addListNodes} from "prosemirror-schema-list"
-import {exampleSetup} from "prosemirror-example-setup"
+import {DOMParser} from "prosemirror-model"
 import {useEffect, useRef} from "react"
 import styled from "styled-components"
+import {schema} from "lib/schema"
+import {plugins} from "lib/plugins"
 
 export const Editor = () => {
   const ref = useRef<HTMLDivElement>(null)
   const initialRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const mySchema = new Schema({
-      nodes: addListNodes(schema.spec.nodes, "paragraph block*", "block"),
-      marks: schema.spec.marks
-    })
-
     if (ref.current && initialRef.current) {
       new EditorView(ref.current, {
         state: EditorState.create({
-          doc: DOMParser.fromSchema(mySchema).parse(initialRef.current),
-          plugins: exampleSetup({schema: mySchema})
+          doc: DOMParser.fromSchema(schema).parse(initialRef.current),
+          plugins
         })
       })
     }

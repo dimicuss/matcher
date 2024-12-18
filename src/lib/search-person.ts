@@ -138,3 +138,5 @@ const sortRanges = (a: TypedRange, b: TypedRange) => {
   const rangeDiff = a.range.order - b.range.order
   return rangeDiff === 0 ? a.range.start - b.range.start : rangeDiff
 }
+
+export type PersonRangePair = ReturnType<typeof searchPersons>[0]
