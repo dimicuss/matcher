@@ -1,23 +1,20 @@
 import {EditorState} from "prosemirror-state"
 import {EditorView} from "prosemirror-view"
-import {DOMParser} from "prosemirror-model"
 import {useEffect, useRef, useState} from "react"
 import styled from "styled-components"
-import {schema} from "lib/schema"
+import {parser} from "lib/schema"
 import {plugins} from "lib/plugins"
-import {Matches} from "./matches"
+import {Matches} from "dev/src/ui/matches"
 
 export const Editor = () => {
   const [state, setState] = useState<EditorState>()
-
   const ref = useRef<HTMLDivElement>(null)
-  const initialRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (ref.current && initialRef.current) {
+    if (ref.current) {
       const view = new EditorView(ref.current, {
         state: EditorState.create({
-          doc: DOMParser.fromSchema(schema).parse(initialRef.current),
+          doc: parser.parse(initialState.body.children[0]),
           plugins
         }),
         dispatchTransaction: (t) => {
@@ -34,17 +31,6 @@ export const Editor = () => {
     <Container>
       <Left>
         <div ref={ref}></div>
-        <div ref={initialRef} style={{display: 'none'}}>
-          <p>
-            Абдалла II
-          </p>
-          <p>
-            Мишустин Михаил
-          </p>
-          <p>
-            Ангела Меркель Олаф Шольц
-          </p>
-        </div>
       </Left>
       <Right>
         {state && <Matches state={state} />}
@@ -68,4 +54,18 @@ const Left = styled.div`
 const Right = styled.div`
   grid-area: r;
 `
+
+const initialState = new DOMParser().parseFromString(`
+<div>
+  <p>
+    Абдалла II
+  </p>
+  <p>
+    Мишустин Михаил
+  </p>
+  <p>
+    Ангела Меркель Олаф Шольц
+  </p>
+</div>
+`, 'text/html')
 

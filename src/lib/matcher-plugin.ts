@@ -1,24 +1,29 @@
-import {create} from "../index";
 import {Plugin, PluginKey} from "prosemirror-state";
-import {PersonRangePair} from "./search-person";
-import {serializer} from "./schema";
-import persons from '../assets/persons.json'
+import {serializer} from "lib/schema";
+import persons from 'assets/persons.json'
+import {MatcherPluginState} from "types";
+import {create} from "../index";
 
-export const matcherPluginKey = new PluginKey<PersonRangePair[]>('matcher-plugin')
+export const matcherPluginKey = new PluginKey<MatcherPluginState>('matcher-plugin')
 
-export const matcherPlugin = new Plugin<PersonRangePair[]>({
+export const matcherPlugin = new Plugin<MatcherPluginState>({
   key: matcherPluginKey,
   state: {
     init: (_, editorState) => {
-      const domFragment = serializer.serializeFragment(editorState.doc.content)
-      const result = create(domFragment)(persons)
-
-      return result
+      const dom = serializer.serializeFragment(editorState.doc.content)
+      const matches = create(dom)(persons)
+      return {
+        dom,
+        matches
+      }
     },
     apply: (t) => {
-      const domFragment = serializer.serializeFragment(t.doc.content)
-      const result = create(domFragment)(persons)
-      return result
+      const dom = serializer.serializeFragment(t.doc.content)
+      const matches = create(dom)(persons)
+      return {
+        dom,
+        matches
+      }
     }
   }
 })

@@ -27,7 +27,9 @@ const config: Configuration = {
   resolve: {
     extensions: [".wasm", ".ts", ".tsx", ".mjs", ".cjs", ".js", ".json"],
     alias: {
-      lib: resolve(__dirname, 'src/lib/')
+      lib: resolve(__dirname, 'src/lib/'),
+      assets: resolve(__dirname, 'src/assets/'),
+      dev: resolve(__dirname, 'src/dev/')
     },
   },
   output: {

@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client'
-import {App} from './app'
+import {App} from './src/ui/app'
 
 const domRoot = document.querySelector('#root')
 

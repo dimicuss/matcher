@@ -4,7 +4,7 @@ import ReactJson from "react-json-view"
 import styled from "styled-components"
 
 export const Matches = ({state}: Props) => {
-  const matches = matcherPluginKey.getState(state) || []
+  const {matches} = matcherPluginKey.getState(state) || {matches: [], dom: undefined}
 
   return (
     <Container>

@@ -20,4 +20,7 @@ export interface TypedRange {
   type: 'middleName' | 'firstName' | 'lastName'
 }
 
-
+export interface MatcherPluginState {
+  dom: HTMLElement | DocumentFragment
+  matches: [Person, Range][]
+}

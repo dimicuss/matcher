@@ -1,4 +1,4 @@
-import {DOMOutputSpec, DOMSerializer, Mark, Node, Schema} from "prosemirror-model"
+import {DOMOutputSpec, DOMSerializer, Mark, Node, Schema, DOMParser} from "prosemirror-model"
 import {schema as basicSchema} from "prosemirror-schema-basic"
 import {addListNodes} from "prosemirror-schema-list"
 
@@ -20,3 +20,4 @@ schema.spec.marks.forEach((markName, {toDOM}) => {
 })
 
 export const serializer = new DOMSerializer(nodes, marks)
+export const parser = DOMParser.fromSchema(schema)
