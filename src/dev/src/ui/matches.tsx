@@ -1,37 +1,13 @@
-import {getNode} from "lib/get-node"
-import {matcherPluginKey} from "lib/matcher-plugin"
-import {wrap} from "lib/wrap"
-import {EditorState} from "prosemirror-state"
-import {useEffect, useState} from "react"
+import {PersonLinksHistory} from "lib/person-links-history"
+import {useState} from "react"
 import ReactJson from "react-json-view"
 import styled from "styled-components"
-import {MatcherPluginState, PersonRangePair} from "types"
+import {MatcherPluginState} from "types"
 
-export const Matches = ({state}: Props) => {
-  const matcherState = matcherPluginKey.getState(state) as MatcherPluginState
-  const matches = matcherState?.matches || []
-  const dom = matcherState?.dom
 
-  const [pairs, setPairs] = useState(new Set<PersonRangePair>())
-
-  useEffect(() => {
-    const pairs = new Set<PersonRangePair>()
-
-    matches.forEach((pair) => {
-      const [, range] = pair
-      if (getNode(dom, range.path)?.parentNode?.nodeName === 'A') {
-        pairs.add(pair)
-      }
-    })
-
-    setPairs(pairs)
-  }, [matches])
-
-  useEffect(() => {
-    if (dom && pairs.size) {
-      console.log(wrap(dom, pairs))
-    }
-  }, [pairs, dom])
+export const Matches = ({matcherState}: Props) => {
+  const {dom, matches} = matcherState
+  const [pairs, setPairs] = useState(() => PersonLinksHistory.create(dom, matches))
 
   return (
     <Container>
@@ -39,19 +15,11 @@ export const Matches = ({state}: Props) => {
         matches.map((pair, i) => {
           const [person, range] = pair
           const handleClick = () => {
-            if (pairs.has(pair)) {
-              const newRanges = new Set(pairs)
-              newRanges.delete(pair)
-              setPairs(newRanges)
-            } else {
-              const newRanges = new Set(pairs)
-              newRanges.add(pair)
-              setPairs(newRanges)
-            }
+            setPairs(pairs.toggle(pair))
           }
 
           return (
-            <Match key={i} data-enabled={pairs.has(pair)}>
+            <Match key={i} data-enabled={pairs.pairs.has(pair)}>
               <ReactJson src={person} name="person" />
               <ReactJson src={range} name="range" />
               <Button onClick={handleClick}>Accept</Button>
@@ -64,7 +32,7 @@ export const Matches = ({state}: Props) => {
 }
 
 interface Props {
-  state: EditorState
+  matcherState: MatcherPluginState
 }
 
 const Container = styled.div`

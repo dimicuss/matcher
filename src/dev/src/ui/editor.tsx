@@ -5,6 +5,7 @@ import styled from "styled-components"
 import {parser} from "lib/schema"
 import {plugins} from "lib/plugins"
 import {Matches} from "dev/src/ui/matches"
+import {matcherPluginKey} from "lib/matcher-plugin"
 
 export const Editor = () => {
   const [state, setState] = useState<EditorState>()
@@ -27,6 +28,9 @@ export const Editor = () => {
     }
   }, [])
 
+
+  const matcherState = state && matcherPluginKey.getState(state)
+
   return (
     <Container>
       <Left>
@@ -37,7 +41,7 @@ export const Editor = () => {
         </Bottom>
       </Left>
       <Right>
-        {state && <Matches state={state} />}
+        {matcherState && <Matches matcherState={matcherState} />}
       </Right>
     </Container>
   )
