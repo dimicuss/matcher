@@ -1,3 +1,4 @@
+import internal from "stream"
 import {Range} from "types"
 
 const wordPattern = '[-a-zA-Zа-яёА-ЯЁ]+'
@@ -8,9 +9,9 @@ export const createTrie = (node: Node) => {
   const root = new TrieNode()
   let order = 0
 
-  dfs(node, (node) => {
+  dfs(node, (node, path) => {
     if (node.nodeName === '#text' && node.textContent) {
-      addTextToTrie(root, node, order)
+      addTextToTrie(root, node, order, path)
     }
     order++
   })
@@ -18,7 +19,7 @@ export const createTrie = (node: Node) => {
   return root
 }
 
-const addTextToTrie = (root: TrieNode, node: Node, order: number) => {
+const addTextToTrie = (root: TrieNode, node: Node, order: number, path: number[]) => {
   const text = node.textContent || ''
   const regex = new RegExp(pattern, 'g')
 
@@ -36,6 +37,7 @@ const addTextToTrie = (root: TrieNode, node: Node, order: number) => {
       word,
       node,
       order,
+      path,
       next: undefined,
     }
 
@@ -65,19 +67,23 @@ const addTextToTrie = (root: TrieNode, node: Node, order: number) => {
   }
 }
 
-const dfs = (node: Node, cb: (range: Node) => void) => {
-  const callStack = [node]
+const dfs = (node: Node, cb: (range: Node, path: number[]) => void) => {
+  const callStack: DFSState[] = [{node, path: []}]
 
   while (callStack.length > 0) {
-    const node = callStack.pop() as Node
+    const {node, path} = callStack.pop() as DFSState
 
-    cb(node)
+
+    cb(node, path)
 
     const nodes = Array.from(node.childNodes)
 
     for (let i = nodes.length - 1; i >= 0; i--) {
       const nextNode = nodes[i]
-      callStack.push(nextNode)
+      callStack.push({
+        node: nextNode,
+        path: [...path, i],
+      })
     }
   }
 }
@@ -88,3 +94,7 @@ export class TrieNode {
   links = new Map<string, TrieNode>()
 }
 
+interface DFSState {
+  node: Node
+  path: number[]
+}

@@ -30,7 +30,11 @@ export const Editor = () => {
   return (
     <Container>
       <Left>
-        <div ref={ref} />
+        <EditorWrapper>
+          <div ref={ref} />
+        </EditorWrapper>
+        <Bottom>
+        </Bottom>
       </Left>
       <Right>
         {state && <Matches state={state} />}
@@ -45,14 +49,28 @@ const Container = styled.div`
   grid-template: 'l r' / 1fr 1fr; 
   gap: 20px;
   height: 100%;
+  background
 `
 
 const Left = styled.div`
+  display: grid;
+  gap: 20px;
   grid-area: l;
+  grid-template: 'a' 1fr 'a' 1fr / 1fr;
+  overflow: auto;
 `
 
 const Right = styled.div`
   grid-area: r;
+  overflow: auto;
+`
+
+const EditorWrapper = styled.div`
+  overflow: auto;
+`
+
+const Bottom = styled.div`
+  overflow: auto;
 `
 
 const initialState = new DOMParser().parseFromString(`
@@ -68,4 +86,5 @@ const initialState = new DOMParser().parseFromString(`
   </p>
 </div>
 `, 'text/html')
+
 

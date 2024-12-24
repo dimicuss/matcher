@@ -13,6 +13,7 @@ export interface Range {
   next: Range | undefined
   node: Node
   order: number
+  path: number[]
 }
 
 export interface TypedRange {

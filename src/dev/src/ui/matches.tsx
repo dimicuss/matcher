@@ -1,3 +1,4 @@
+import {getNode} from "lib/get-node"
 import {matcherPluginKey} from "lib/matcher-plugin"
 import {EditorState} from "prosemirror-state"
 import {useEffect, useState} from "react"
@@ -14,6 +15,16 @@ export const Matches = ({state}: Props) => {
   useEffect(() => {
     setRanges(new Set)
   }, [matches])
+
+  useEffect(() => {
+    if (domToEdit) {
+      for (const range of ranges) {
+        console.log(
+          getNode(domToEdit, range.path)
+        )
+      }
+    }
+  }, [ranges, domToEdit])
 
   return (
     <Container>

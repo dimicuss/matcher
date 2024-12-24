@@ -14,6 +14,6 @@ export const createRange = (ranges: TypedRange[]): Range => {
     order: first.range.order,
     word,
     node,
-
+    path: first.range.path,
   }
 }
