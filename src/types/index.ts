@@ -27,3 +27,5 @@ export interface MatcherPluginState {
   dom: HTMLElement | DocumentFragment
   matches: PersonRangePair[]
 }
+
+export type LocalNode = HTMLElement | DocumentFragment | Node

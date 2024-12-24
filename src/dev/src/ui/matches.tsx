@@ -5,32 +5,31 @@ import {EditorState} from "prosemirror-state"
 import {useEffect, useState} from "react"
 import ReactJson from "react-json-view"
 import styled from "styled-components"
-import {PersonRangePair, Range} from "types"
+import {MatcherPluginState, PersonRangePair} from "types"
 
 export const Matches = ({state}: Props) => {
-  const [pairs, setOairs] = useState(new Set<PersonRangePair>())
-  const matcherState = matcherPluginKey.getState(state)
+  const matcherState = matcherPluginKey.getState(state) as MatcherPluginState
   const matches = matcherState?.matches || []
   const dom = matcherState?.dom
 
+  const [pairs, setPairs] = useState(new Set<PersonRangePair>())
+
   useEffect(() => {
-    setOairs(new Set)
+    const pairs = new Set<PersonRangePair>()
+
+    matches.forEach((pair) => {
+      const [, range] = pair
+      if (getNode(dom, range.path)?.parentNode?.nodeName === 'A') {
+        pairs.add(pair)
+      }
+    })
+
+    setPairs(pairs)
   }, [matches])
 
   useEffect(() => {
     if (dom && pairs.size) {
-      let resultDom = dom
-
-      for (const [person, range] of pairs) {
-        const node = getNode(resultDom, range.path)
-
-
-        if (node) {
-          wrap(resultDom, person, range)
-        }
-      }
-
-      console.log(dom)
+      console.log(wrap(dom, pairs))
     }
   }, [pairs, dom])
 
@@ -43,11 +42,11 @@ export const Matches = ({state}: Props) => {
             if (pairs.has(pair)) {
               const newRanges = new Set(pairs)
               newRanges.delete(pair)
-              setOairs(newRanges)
+              setPairs(newRanges)
             } else {
               const newRanges = new Set(pairs)
               newRanges.add(pair)
-              setOairs(newRanges)
+              setPairs(newRanges)
             }
           }
 
@@ -84,7 +83,6 @@ const Match = styled.div`
     background-color: #A1E8A1;
   }
 `
-
 
 const Button = styled.button`
   margin-top: 10px;

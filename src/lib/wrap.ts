@@ -1,27 +1,36 @@
-import {Person, Range} from "types";
+import {LocalNode, PersonRangePair} from "types";
 import {getNode} from "./get-node";
 
-export const wrap = (dom: HTMLElement | DocumentFragment | Node, person: Person, range: Range) => {
-  const node = getNode(dom, range.path) as HTMLElement
+export const wrap = (dom: LocalNode, pairs: Set<PersonRangePair>) => {
+  const clonedNode = dom.cloneNode(true)
 
-  if (node) {
-    if (node.parentElement?.nodeName !== 'A' && node.textContent) {
-      const pre = node.textContent?.substring(0, range.start)
-      const post = node.textContent?.substring(range.end, Infinity)
+  for (const [person, range] of pairs) {
+    const node = getNode(clonedNode, range.path) as HTMLElement
 
-      const anchor = document.createElement('a')
-      anchor.textContent = range.word
-      anchor.href = `model://person/${person.id}`
+    if (node && node.textContent) {
+      if (node.parentElement?.nodeName !== 'A') {
+        const pre = node.textContent?.substring(0, range.start)
+        const post = node.textContent?.substring(range.end, Infinity)
 
-      const fragment = document.createDocumentFragment()
-      const preText = document.createTextNode(pre)
-      const postText = document.createTextNode(post)
+        const anchor = document.createElement('a')
+        anchor.textContent = range.word
+        anchor.href = `model://person/${person.id}`
 
-      fragment.appendChild(preText)
-      fragment.appendChild(anchor)
-      fragment.appendChild(postText)
+        const fragment = document.createDocumentFragment()
+        const preText = document.createTextNode(pre)
+        const postText = document.createTextNode(post)
 
-      node.replaceWith(fragment)
+        fragment.appendChild(preText)
+        fragment.appendChild(anchor)
+        fragment.appendChild(postText)
+
+        node.replaceWith(fragment)
+      } else {
+        node.parentElement?.replaceWith(node)
+      }
     }
   }
+
+  return clonedNode as LocalNode
 }
+
