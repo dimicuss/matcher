@@ -43,7 +43,7 @@ const config: Configuration = {
   plugins,
   optimization: {
     minimize: false
-  }
+  },
 };
 
 export default config

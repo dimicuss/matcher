@@ -10,9 +10,10 @@ export const createRange = (ranges: TypedRange[]): Range => {
   return {
     start: first.range.start,
     end: last.range.end,
+    next: undefined,
+    order: first.range.order,
     word,
     node,
-    next: undefined,
-    order: first.range.order
+
   }
 }

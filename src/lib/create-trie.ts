@@ -9,20 +9,17 @@ export const createTrie = (node: Node) => {
   let order = 0
 
   dfs(node, (node) => {
-    if (node.nodeName === '#text') {
-      const {textContent} = node
-
-      if (textContent) {
-        addTextToTrie(root, textContent, node, order)
-        order++
-      }
+    if (node.nodeName === '#text' && node.textContent) {
+      addTextToTrie(root, node, order)
     }
+    order++
   })
 
   return root
 }
 
-const addTextToTrie = (root: TrieNode, text: string, node: Node, order: number) => {
+const addTextToTrie = (root: TrieNode, node: Node, order: number) => {
+  const text = node.textContent || ''
   const regex = new RegExp(pattern, 'g')
 
   let match: RegExpExecArray | null = null
@@ -66,8 +63,6 @@ const addTextToTrie = (root: TrieNode, text: string, node: Node, order: number) 
 
     currentNode.ranges.push(range)
   }
-
-  return {text, root}
 }
 
 const dfs = (node: Node, cb: (range: Node) => void) => {

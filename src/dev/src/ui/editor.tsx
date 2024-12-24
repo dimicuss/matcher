@@ -30,7 +30,7 @@ export const Editor = () => {
   return (
     <Container>
       <Left>
-        <div ref={ref}></div>
+        <div ref={ref} />
       </Left>
       <Right>
         {state && <Matches state={state} />}

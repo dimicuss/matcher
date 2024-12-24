@@ -102,8 +102,8 @@ const searchWord = (wordToSplit: string, trie: TrieNode, cb: (range: Range) => v
       } else break
     }
 
-    commonLength += word.length
     commonHits += hits
+    commonLength += word.length
 
     if (hits / word.length >= SEARCH_FACTOR) {
       nodes.push({node, hits})
