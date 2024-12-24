@@ -1,49 +1,58 @@
 import {getNode} from "lib/get-node"
 import {matcherPluginKey} from "lib/matcher-plugin"
+import {wrap} from "lib/wrap"
 import {EditorState} from "prosemirror-state"
 import {useEffect, useState} from "react"
 import ReactJson from "react-json-view"
 import styled from "styled-components"
-import {Range} from "types"
+import {PersonRangePair, Range} from "types"
 
 export const Matches = ({state}: Props) => {
-  const [ranges, setRanges] = useState(new Set<Range>())
+  const [pairs, setOairs] = useState(new Set<PersonRangePair>())
   const matcherState = matcherPluginKey.getState(state)
   const matches = matcherState?.matches || []
-  const domToEdit = matcherState?.dom
+  const dom = matcherState?.dom
 
   useEffect(() => {
-    setRanges(new Set)
+    setOairs(new Set)
   }, [matches])
 
   useEffect(() => {
-    if (domToEdit) {
-      for (const range of ranges) {
-        console.log(
-          getNode(domToEdit, range.path)
-        )
+    if (dom && pairs.size) {
+      let resultDom = dom
+
+      for (const [person, range] of pairs) {
+        const node = getNode(resultDom, range.path)
+
+
+        if (node) {
+          wrap(resultDom, person, range)
+        }
       }
+
+      console.log(dom)
     }
-  }, [ranges, domToEdit])
+  }, [pairs, dom])
 
   return (
     <Container>
       {
-        matches.map(([person, range], i) => {
+        matches.map((pair, i) => {
+          const [person, range] = pair
           const handleClick = () => {
-            if (ranges.has(range)) {
-              const newRanges = new Set(ranges)
-              newRanges.delete(range)
-              setRanges(newRanges)
+            if (pairs.has(pair)) {
+              const newRanges = new Set(pairs)
+              newRanges.delete(pair)
+              setOairs(newRanges)
             } else {
-              const newRanges = new Set(ranges)
-              newRanges.add(range)
-              setRanges(newRanges)
+              const newRanges = new Set(pairs)
+              newRanges.add(pair)
+              setOairs(newRanges)
             }
           }
 
           return (
-            <Match key={i} data-enabled={ranges.has(range)}>
+            <Match key={i} data-enabled={pairs.has(pair)}>
               <ReactJson src={person} name="person" />
               <ReactJson src={range} name="range" />
               <Button onClick={handleClick}>Accept</Button>

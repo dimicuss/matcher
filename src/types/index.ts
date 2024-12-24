@@ -21,7 +21,9 @@ export interface TypedRange {
   type: 'middleName' | 'firstName' | 'lastName'
 }
 
+export type PersonRangePair = [Person, Range]
+
 export interface MatcherPluginState {
   dom: HTMLElement | DocumentFragment
-  matches: [Person, Range][]
+  matches: PersonRangePair[]
 }

@@ -1,4 +1,4 @@
-export const getNode = (root: Node | HTMLElement | DocumentFragment, path: number[]) => {
+export const getNode = (root: Node | HTMLElement | DocumentFragment, path: number[]): Node | undefined => {
   let node = root
 
   for (const index of path) {
