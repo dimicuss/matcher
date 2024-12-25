@@ -5,23 +5,11 @@ export class PersonLinksHistory {
   pairs: Set<PersonRangePair>
   dom: LocalNode
 
-  static create(dom: LocalNode, pairsToSet: PersonRangePair[]) {
-    const pairs = new Set<PersonRangePair>()
-
-    for (const pair of pairsToSet) {
-      const [, range] = pair
-      if (getNode(dom, range.path)?.parentNode?.nodeName === 'A') {
-        pairs.add(pair)
-      }
-    }
-
-    return new PersonLinksHistory(dom, pairs)
-  }
-
   constructor(dom: LocalNode, pairs: Set<PersonRangePair>) {
     this.dom = dom
     this.pairs = pairs
   }
+
 
   toggle(pair: PersonRangePair) {
     if (this.pairs.has(pair)) {
@@ -41,45 +29,55 @@ export class PersonLinksHistory {
     return new PersonLinksHistory(newDom, nextPairs)
   }
 
-  unwrap(pair: PersonRangePair) {
-    const clonedNode = this.dom.cloneNode(true)
+  static create(dom: LocalNode, pairsToSet: PersonRangePair[]) {
+    const pairs = new Set<PersonRangePair>()
 
+    for (const pair of pairsToSet) {
+      const [, range] = pair
+      if (getNode(dom, range.path)?.parentNode?.nodeName === 'A') {
+        pairs.add(pair)
+      }
+    }
+
+    return new PersonLinksHistory(dom, pairs)
+  }
+
+  private unwrap(pair: PersonRangePair) {
+    const clonedDom = this.dom.cloneNode(true)
     const [, range] = pair
-    const node = getNode(clonedNode, range.path) as HTMLElement
+    const node = getNode(clonedDom, range.path) as HTMLElement
 
     if (node && node.parentElement && node.parentElement.nodeName === 'A' && node.textContent) {
       node.parentElement.replaceWith(node)
     }
 
-    return clonedNode as LocalNode
+    return clonedDom as LocalNode
   }
 
-  wrap(pair: PersonRangePair) {
-    const clonedNode = this.dom.cloneNode(true)
+  private wrap(pair: PersonRangePair) {
+    const clonedDom = this.dom.cloneNode(true)
     const [person, range] = pair
-    const node = getNode(clonedNode, range.path) as HTMLElement
+    const node = getNode(clonedDom, range.path) as HTMLElement
 
-    if (node && node.textContent) {
-      if (node.parentElement?.nodeName !== 'A') {
-        const pre = node.textContent?.substring(0, range.start)
-        const post = node.textContent?.substring(range.end, Infinity)
+    if (node && node.parentElement && node.parentElement.nodeName !== 'A' && node.textContent) {
+      const pre = node.textContent?.substring(0, range.start)
+      const post = node.textContent?.substring(range.end, Infinity)
 
-        const anchor = document.createElement('a')
-        anchor.textContent = range.word
-        anchor.href = `model://person/${person.id}`
+      const anchor = document.createElement('a')
+      anchor.textContent = range.word
+      anchor.href = `model://person/${person.id}`
 
-        const fragment = document.createDocumentFragment()
-        const preText = document.createTextNode(pre)
-        const postText = document.createTextNode(post)
+      const fragment = document.createDocumentFragment()
+      const preText = document.createTextNode(pre)
+      const postText = document.createTextNode(post)
 
-        fragment.appendChild(preText)
-        fragment.appendChild(anchor)
-        fragment.appendChild(postText)
+      fragment.appendChild(preText)
+      fragment.appendChild(anchor)
+      fragment.appendChild(postText)
 
-        node.replaceWith(fragment)
-      }
+      node.replaceWith(fragment)
     }
 
-    return clonedNode as LocalNode
+    return clonedDom as LocalNode
   }
 }

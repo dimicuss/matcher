@@ -8,6 +8,7 @@ import {Matches} from "dev/src/ui/matches"
 import {matcherPluginKey} from "lib/matcher-plugin"
 
 export const Editor = () => {
+  const [view, setView] = useState<EditorView>()
   const [state, setState] = useState<EditorState>()
   const ref = useRef<HTMLDivElement>(null)
 
@@ -23,7 +24,7 @@ export const Editor = () => {
           setState(view.state)
         }
       })
-
+      setView(view)
       setState(view.state)
     }
   }, [])
@@ -41,7 +42,7 @@ export const Editor = () => {
         </Bottom>
       </Left>
       <Right>
-        {matcherState && <Matches matcherState={matcherState} />}
+        {matcherState && view && <Matches view={view} matcherState={matcherState} />}
       </Right>
     </Container>
   )

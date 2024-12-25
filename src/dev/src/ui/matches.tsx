@@ -1,13 +1,15 @@
-import {PersonLinksHistory} from "lib/person-links-history"
-import {useState} from "react"
+import {plugins} from "lib/plugins"
+import {schema} from "lib/schema"
+import {DOMParser} from "prosemirror-model"
+import {EditorState} from "prosemirror-state"
+import {EditorView} from "prosemirror-view"
 import ReactJson from "react-json-view"
 import styled from "styled-components"
 import {MatcherPluginState} from "types"
 
 
-export const Matches = ({matcherState}: Props) => {
-  const {dom, matches} = matcherState
-  const [pairs, setPairs] = useState(() => PersonLinksHistory.create(dom, matches))
+export const Matches = ({matcherState, view}: Props) => {
+  const {matches, history} = matcherState
 
   return (
     <Container>
@@ -15,11 +17,15 @@ export const Matches = ({matcherState}: Props) => {
         matches.map((pair, i) => {
           const [person, range] = pair
           const handleClick = () => {
-            setPairs(pairs.toggle(pair))
+            const doc = DOMParser.fromSchema(schema).parse(history.toggle(pair).dom)
+            const size = view.state.doc.content.size
+            view.dispatch(
+              view.state.tr.replaceWith(0, size, doc)
+            )
           }
 
           return (
-            <Match key={i} data-enabled={pairs.pairs.has(pair)}>
+            <Match key={i} data-enabled={history.pairs.has(pair)}>
               <ReactJson src={person} name="person" />
               <ReactJson src={range} name="range" />
               <Button onClick={handleClick}>Accept</Button>
@@ -32,6 +38,7 @@ export const Matches = ({matcherState}: Props) => {
 }
 
 interface Props {
+  view: EditorView
   matcherState: MatcherPluginState
 }
 

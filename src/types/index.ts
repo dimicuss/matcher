@@ -1,3 +1,5 @@
+import {PersonLinksHistory} from "lib/person-links-history"
+
 export type Person = {
   title: string,
   last_name: string | null,
@@ -26,6 +28,7 @@ export type PersonRangePair = [Person, Range]
 export interface MatcherPluginState {
   dom: HTMLElement | DocumentFragment
   matches: PersonRangePair[]
+  history: PersonLinksHistory
 }
 
 export type LocalNode = HTMLElement | DocumentFragment | Node
