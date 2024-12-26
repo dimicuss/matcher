@@ -1,24 +1,21 @@
-import {plugins} from "lib/plugins"
 import {schema} from "lib/schema"
 import {DOMParser} from "prosemirror-model"
-import {EditorState} from "prosemirror-state"
 import {EditorView} from "prosemirror-view"
 import ReactJson from "react-json-view"
 import styled from "styled-components"
 import {MatcherPluginState} from "types"
 
-
 export const Matches = ({matcherState, view}: Props) => {
-  const {matches, history} = matcherState
+  const {pairs, history} = matcherState
 
   return (
     <Container>
       {
-        matches.map((pair, i) => {
+        pairs.map((pair, i) => {
           const [person, range] = pair
           const handleClick = () => {
             const doc = DOMParser.fromSchema(schema).parse(history.toggle(pair).dom)
-            const size = view.state.doc.content.size
+            const {size} = view.state.doc.content
             view.dispatch(
               view.state.tr.replaceWith(0, size, doc)
             )

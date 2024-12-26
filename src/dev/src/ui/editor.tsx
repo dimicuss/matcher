@@ -88,6 +88,7 @@ const initialState = new DOMParser().parseFromString(`
   </p>
   <p>
     <a href="model://person/55">Ангела Меркель</a> Олаф Шольц
+    Владимир Владимирович
   </p>
 </div>
 `, 'text/html')

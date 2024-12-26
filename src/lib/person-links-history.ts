@@ -1,15 +1,16 @@
-import {LocalNode, PersonRangePair} from "types";
+import {IntersectedPairs, LocalNode, Person, PersonRangePair} from "types";
 import {getNode} from "./get-node";
 
 export class PersonLinksHistory {
-  pairs: Set<PersonRangePair>
   dom: LocalNode
+  pairs: Set<PersonRangePair>
+  intersectedPairs: IntersectedPairs
 
-  constructor(dom: LocalNode, pairs: Set<PersonRangePair>) {
+  constructor(dom: LocalNode, pairs: Set<PersonRangePair>, intersectedPairs: IntersectedPairs) {
     this.dom = dom
     this.pairs = pairs
+    this.intersectedPairs = intersectedPairs
   }
-
 
   toggle(pair: PersonRangePair) {
     if (this.pairs.has(pair)) {
@@ -18,28 +19,45 @@ export class PersonLinksHistory {
 
       nextPairs.delete(pair)
 
-      return new PersonLinksHistory(newDom, nextPairs)
+      return new PersonLinksHistory(newDom, nextPairs, this.intersectedPairs)
     }
 
+    const intersectedPairs = this.intersectedPairs.get(pair) || new Set
     const newDom = this.wrap(pair)
     const nextPairs = new Set(this.pairs)
 
     nextPairs.add(pair)
 
-    return new PersonLinksHistory(newDom, nextPairs)
+    for (const intersectedPair of intersectedPairs) {
+      nextPairs.delete(intersectedPair)
+    }
+
+    return new PersonLinksHistory(newDom, nextPairs, this.intersectedPairs)
   }
 
-  static create(dom: LocalNode, pairsToSet: PersonRangePair[]) {
+  static create(dom: LocalNode, pairsToSet: PersonRangePair[], intersectedPairs: IntersectedPairs) {
     const pairs = new Set<PersonRangePair>()
 
     for (const pair of pairsToSet) {
-      const [, range] = pair
-      if (getNode(dom, range.path)?.parentNode?.nodeName === 'A') {
+      const [person, range] = pair
+      const parentNode = getNode(dom, range.path)?.parentNode
+
+      if (parentNode && parentNode instanceof HTMLAnchorElement && PersonLinksHistory.getPersonId(parentNode.href) === person.id) {
         pairs.add(pair)
       }
     }
 
-    return new PersonLinksHistory(dom, pairs)
+    return new PersonLinksHistory(dom, pairs, intersectedPairs)
+  }
+
+  static getPersonId(href: string) {
+    const id = /person\/(\d+)$/.exec(href)?.[1]
+
+    if (id) {
+      return Number(id)
+    }
+
+    return undefined
   }
 
   private unwrap(pair: PersonRangePair) {
@@ -59,23 +77,27 @@ export class PersonLinksHistory {
     const [person, range] = pair
     const node = getNode(clonedDom, range.path) as HTMLElement
 
-    if (node && node.parentElement && node.parentElement.nodeName !== 'A' && node.textContent) {
-      const pre = node.textContent?.substring(0, range.start)
-      const post = node.textContent?.substring(range.end, Infinity)
+    if (node && node.parentElement && node.textContent) {
+      if (node.parentElement instanceof HTMLAnchorElement) {
+        node.parentElement.href = `model://person/${person.id}`
+      } else {
+        const pre = node.textContent.substring(0, range.start)
+        const post = node.textContent.substring(range.end, Infinity)
 
-      const anchor = document.createElement('a')
-      anchor.textContent = range.word
-      anchor.href = `model://person/${person.id}`
+        const anchor = document.createElement('a')
+        anchor.textContent = range.word
+        anchor.href = `model://person/${person.id}`
 
-      const fragment = document.createDocumentFragment()
-      const preText = document.createTextNode(pre)
-      const postText = document.createTextNode(post)
+        const fragment = document.createDocumentFragment()
+        const preText = document.createTextNode(pre)
+        const postText = document.createTextNode(post)
 
-      fragment.appendChild(preText)
-      fragment.appendChild(anchor)
-      fragment.appendChild(postText)
+        fragment.appendChild(preText)
+        fragment.appendChild(anchor)
+        fragment.appendChild(postText)
 
-      node.replaceWith(fragment)
+        node.replaceWith(fragment)
+      }
     }
 
     return clonedDom as LocalNode

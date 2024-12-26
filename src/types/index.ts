@@ -24,10 +24,11 @@ export interface TypedRange {
 }
 
 export type PersonRangePair = [Person, Range]
+export type IntersectedPairs = Map<PersonRangePair, Set<PersonRangePair>>
 
 export interface MatcherPluginState {
   dom: HTMLElement | DocumentFragment
-  matches: PersonRangePair[]
+  pairs: PersonRangePair[]
   history: PersonLinksHistory
 }
 
