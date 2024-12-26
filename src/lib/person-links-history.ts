@@ -40,9 +40,9 @@ export class PersonLinksHistory {
 
     for (const pair of pairsToSet) {
       const [person, range] = pair
-      const parentNode = getNode(dom, range.path)?.parentNode
+      const parentNode = getNode(dom, range.path)?.parentElement
 
-      if (parentNode && parentNode instanceof HTMLAnchorElement && PersonLinksHistory.getPersonId(parentNode.href) === person.id) {
+      if (parentNode instanceof HTMLAnchorElement && PersonLinksHistory.getPersonId(parentNode.href) === person.id) {
         pairs.add(pair)
       }
     }
@@ -64,9 +64,10 @@ export class PersonLinksHistory {
     const clonedDom = this.dom.cloneNode(true)
     const [, range] = pair
     const node = getNode(clonedDom, range.path) as HTMLElement
+    const parentElement = node.parentElement
 
-    if (node && node.parentElement && node.parentElement.nodeName === 'A' && node.textContent) {
-      node.parentElement.replaceWith(node)
+    if (node?.textContent && parentElement instanceof HTMLAnchorElement) {
+      parentElement.replaceWith(node)
     }
 
     return clonedDom as LocalNode
@@ -77,9 +78,11 @@ export class PersonLinksHistory {
     const [person, range] = pair
     const node = getNode(clonedDom, range.path) as HTMLElement
 
-    if (node && node.parentElement && node.textContent) {
-      if (node.parentElement instanceof HTMLAnchorElement) {
-        node.parentElement.href = `model://person/${person.id}`
+    const parentElement = node.parentElement
+
+    if (node.textContent && parentElement) {
+      if (parentElement instanceof HTMLAnchorElement) {
+        parentElement.href = `model://person/${person.id}`
       } else {
         const pre = node.textContent.substring(0, range.start)
         const post = node.textContent.substring(range.end, Infinity)
