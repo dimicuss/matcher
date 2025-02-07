@@ -24,7 +24,9 @@ export const searchPersons = (persons: Person[], trie: TrieNode) => {
     }
   }
 
-  return [...result]
+  const pairs = [...result]
+
+  return pairs.sort(([_, a], [__, b]) => sortRanges(a, b))
 }
 
 const searchFullPerson = (person: Person, trie: TrieNode) => {
@@ -46,14 +48,13 @@ const searchFullPerson = (person: Person, trie: TrieNode) => {
     searchWord(middleName, trie, (range) => ranges.push({range, type: 'middleName'}))
   }
 
-  ranges.sort(sortRanges)
+  ranges.sort(sortTypedRanges)
 
   const mergedRanges = mergeRanges(ranges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
 
-  return lastName && firstName || firstName && middleName
+  return lastName && firstName
     ? mergedRanges.filter((ranges) =>
-      ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName') ||
-      ranges.find(({type}) => type === 'middleName') && ranges.find(({type}) => type === 'firstName'))
+      ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName'))
     : firstName && !lastName && !middleName
       ? mergedRanges.filter((ranges) => ranges.find(({type}) => type === 'firstName'))
       : []
@@ -78,7 +79,7 @@ const searchShortPerson = (person: Person, trie: TrieNode) => {
     searchWord(middleName, trie, (range) => ranges.push({range, type: 'middleName'}))
   }
 
-  const handledRanges = removeDuplicates(ranges, ({range}) => range).sort(sortRanges)
+  const handledRanges = removeDuplicates(ranges, ({range}) => range).sort(sortTypedRanges)
 
   return mergeRanges(handledRanges, (a, b) => a.range.next !== undefined && a.range.next === b.range)
     .filter((ranges) => ranges.find(({type}) => type === 'lastName') && ranges.find(({type}) => type === 'firstName'))
@@ -134,8 +135,11 @@ const dfs = (node: TrieNode, cb: (range: Range) => void) => {
 }
 
 
-const sortRanges = (a: TypedRange, b: TypedRange) => {
-  const rangeDiff = a.range.order - b.range.order
-  return rangeDiff === 0 ? a.range.start - b.range.start : rangeDiff
+const sortTypedRanges = (a: TypedRange, b: TypedRange) => sortRanges(a.range, b.range)
+
+
+const sortRanges = <T extends {order: number, start: number}>(a: T, b: T) => {
+  const rangeDiff = a.order - b.order
+  return rangeDiff === 0 ? a.start - b.start : rangeDiff
 }
 

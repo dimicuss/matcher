@@ -1,8 +1,10 @@
-export const getNode = (root: Node | HTMLElement | DocumentFragment, path: number[]): Node | undefined => {
+export const getNode = (root: Node | HTMLElement | DocumentFragment, path: number[]): Node => {
   let node = root
 
   for (const index of path) {
-    node = node.childNodes[index]
+    const child = node.childNodes[index]
+    if (!child) break
+    node = child
   }
 
   return node
